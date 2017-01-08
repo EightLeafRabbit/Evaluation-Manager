@@ -1,30 +1,53 @@
-$(document).ready(function(){
-	var scrollGlobals = {questionCounter:0, questionList : 0};
+$(function(){
+	//Page initialization
+	var questionData = {currentQuestionIndex:0, questionList: null};
 	var testData = TestData();
-	//we make the ajax request
-	$.ajax({
-		type: "POST",
-		url : 'returnQuestionList.php',
-		dataType : "json",
-		success:function(result){
-			if(result !== 'failure'){
-				scrollGlobals.questionList = result;
+	
+	var rfTestData = {};
+	
+	//Event handlers
+	$('#container').on('click', '#startButton', function(){
+		rfTestData.firstNameValue = $('#firstName').val();
+		rfTestData.lastNameValue = $('#lastName').val();
+		
+		if(rfTestData.firstNameValue === '' || rfTestData.lastNameValue === ''){
+			$('#intervieweeInfoResult').html("Fill out the required information.");
+		}
+		else{
+			testData.startTimer();
+			nextQuestion();
+		}
+	});
+	
+	$('#container').on('click','.continueButton', nextQuestion);
+
+	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
+		console.log("AJAX Error\n" + 
+		"Thrown Error: " + thrownError + "\n" +
+		"Response: " + jqXHR.responseText);
+	});
+
+	$.get({
+		url: "getInterviewQuestions.php",
+		dataType: "json",
+		success: function(result){
+			if(result !== "failure") {
+				questionData.questionList = result;
 			}
 			else {
 				$('#intervieweeInfoResult').html("There was an error retrieving the question list.");
 			}
-		}
+		} 
 	});
-	
-	
+
 	function nextQuestion(){
-		if(scrollGlobals.questionCounter !== 0){
-			var completedQuestionIndex = scrollGlobals.questionCounter - 1;
+		if(questionData.currentQuestionIndex !== 0){
+			var completedQuestionIndex = questionData.currentQuestionIndex - 1;
 			testData.addQAData();
 		}
-		if(scrollGlobals.questionCounter < scrollGlobals.questionList.length){
-			var questionIndex = scrollGlobals.questionCounter;
-			var questionList = scrollGlobals.questionList;
+		if(questionData.currentQuestionIndex < questionData.questionList.length){
+			var questionIndex = questionData.currentQuestionIndex;
+			var questionList = questionData.questionList;
 			
 			$('#questionPanel').append("<section id=\"questionDisplay\"><div><h1 class=\"questionNumber" + questionIndex + "\"></h1><div id=\"interviewForm\"><h3 id=\"questionTitle" + questionIndex + "\"></h3><p id=\"questionDescription" + questionIndex + "\"></p><textarea id=\"answer" + questionIndex + "\"></textarea><div class=\"buttonContainer\"><button name=\"continueButton\" class=\"continueButton\" id=\"continueButton" + questionIndex + "\">Continue</button></div></div></div></section><div class=\"space\"></div>");
 		
@@ -37,9 +60,9 @@ $(document).ready(function(){
 			
 			//Prevent users from scrolling to the previous question.
 			$('body').css("overflow", "hidden");
-			scrollGlobals.questionCounter++;
+			questionData.currentQuestionIndex++;
 			
-			if(scrollGlobals.questionCounter == scrollGlobals.questionList.length){
+			if(questionData.currentQuestionIndex == questionData.questionList.length){
 				$('#continueButton' + questionIndex).html("Finish");
 				$('#continueButton' + questionIndex).click(function() {
 					$('#questionPanel').append("<section id=\"endMessageDisplay\"><div><h1 class=\"endPage\">Thank you!<br/>Your evaluation has been sent to the appropriate personnel.</h1></div></section><div class=\"space\"></div>");
@@ -78,33 +101,6 @@ $(document).ready(function(){
 			testData.endTimer();
 		}
 	}
-	
-	
-	function preventScrolling(){
-			
-	}
-	
-	$(function(){
-		$('#container').on('click','#startButton',function(){
-			var firstNameValue = $('#firstName').val();
-			var lastNameValue = $('#lastName').val();
-			
-			if(firstNameValue === '' || lastNameValue === ''){
-				$('#intervieweeInfoResult').html("Fill out the required information.");
-			}
-			else{
-				testData.startTimer();
-				nextQuestion();
-			}
-		});
-	});
-	
-	$(function(){
-		$('#container').on('click','.continueButton',function(){
-			nextQuestion();
-			
-		});
-	});
 	
 	//TestData factory
 	function TestData() {
