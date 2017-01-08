@@ -8,18 +8,21 @@
 <?php include("header.php"); ?>
 
 <!-- Begin Login Form-->
-	<h1 class="testHeader">Control Panel Login</h1>
-	<div id="wrapper">
-		<form id="loginForm" action="process.php" method="post">
-			<label>Username:</label>
-			<input type="text" class="field" name="username" id="username"/>
-
-			<label>Password:</label>
-			<input type="password" class="field" name="password" id="password"/>
-			<div class="buttonContainer">
-				<input type="submit" name="submit" value="login"/>
-			</div>
-		</form>
-	</div>
+	<div id="loginWrapper">
+		<h2>Timed Evaluation Manager</h2>
+		<div id="loginFormWrapper">
+			<p>Log in to the dashboard</p>
+			<form id="loginForm" action="process.php" method="post">
+				<input type="text" class="field" name="username" id="username" placeholder="Username"/>
+				<input type="password" class="field" name="password" id="password" placeholder="Password"/>
+				<div class="buttonContainer">
+					<input type="submit" name="submit" value="Log in"/>
+				</div>
+			</form>
+			
+		</div> <!-- End loginFormWrapper-->
+		<p>Developed By: <a href="http://www.eightleafrabbit.com" target="_blank">Eight Leaf Rabbit</a></p>
+	</div> <!-- End loginWrapper-->
+	
 <!-- Include Footer-->
 <?php include("footer.php"); ?>

@@ -3,7 +3,8 @@
 
 	<!-- Dashboard Contents-->
 	<header>
-		<div class="logo">Air & Water</div>
+		<div class="logo">Timed Evaluation Manager</div>
+		<div class="logout"><a href="logout.php">Log Out</a></div>
 	</header>
 	
 	<a class="mobile" href="#">MENU</a>
