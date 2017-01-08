@@ -5,8 +5,8 @@
 <div id="container">
 	<section id="div1">
 		<div>
-			<h1 class="testHeader">Air & Water</h1>
-			<h3>Customer Service Evaluation</h3>
+			<h1 class="testHeader">Company Name</h1>
+			<h3>Department Evaluation</h3>
 			<div id="interviewForm">
 				<label>First Name:</label>
 				<input type="text" class="field" name="firstName" id="firstName"/>
