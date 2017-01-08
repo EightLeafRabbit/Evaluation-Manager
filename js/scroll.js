@@ -32,15 +32,17 @@ $(document).ready(function(){
 			$('#questionTitle' + questionIndex).html(questionList[questionIndex].question);
 			$('#questionDescription' + questionIndex).html(questionList[questionIndex].description);
 			
-			
+			//Scrolls the web page to the next question.
 			$('body, html').animate({ scrollTop: $(".questionNumber" + questionIndex).offset().top }, 1000);
 			
-			
+			//Prevent users from scrolling to the previous question.
+			$('body').css("overflow", "hidden");
 			scrollGlobals.questionCounter++;
+			
 			if(scrollGlobals.questionCounter == scrollGlobals.questionList.length){
 				$('#continueButton' + questionIndex).html("Finish");
 				$('#continueButton' + questionIndex).click(function() {
-					$('#questionPanel').append("<section id=\"endMessageDisplay\"><div><h1 class=\"endPage\">Thank you!<br/>Your evaluation has been sent to the manager.</h1></div></section><div class=\"space\"></div>");
+					$('#questionPanel').append("<section id=\"endMessageDisplay\"><div><h1 class=\"endPage\">Thank you!<br/>Your evaluation has been sent to the appropriate personnel.</h1></div></section><div class=\"space\"></div>");
 					$('body, html').animate({ scrollTop: $(".endPage").offset().top }, 1000);
 					
 					//Save test
@@ -70,11 +72,13 @@ $(document).ready(function(){
 					});
 				});
 			}
+			
 		}
 		else{
 			testData.endTimer();
 		}
 	}
+	
 	
 	function preventScrolling(){
 			
