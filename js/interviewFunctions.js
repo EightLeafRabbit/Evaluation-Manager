@@ -5,32 +5,54 @@ $(function(){
 	var questionData = {currentQuestionIndex:0, questionList: null};
 
 	var stopwatch = function(){
-		var mStartTime;
-		var mEndTime;
+		var startTime;
+		var splitStartTime;
+		var endTime;
+		var splits = [];
 		var running = false;
+
 
 		return {
 			start: function(){
 				if(!running){ 
-					mStartTime = new Date();
+					startTime = new Date();
+					splitStartTime = startTime;
 					running = true;
+				}
+			},
+			split: function(){
+				if(running){
+					var now = new Date();
+					var splitTime = Math.round((now - splitStartTime)/1000); 
+					splits.push(splitTime);
+					splitStartTime = now;
 				}
 			},
 			stop: function(){
 				if(running){
-					mEndTime = new Date();
+					this.split();
+					endTime = new Date();
 					running = false;
 				}
 			},
 			getData: function(){
+				var sumSplits = splits.reduce(function(previousValue, currentValue){
+					return currentValue + previousValue;
+				});
+				
 				return {
-					startTime: mStartTime,
-					endTime: mEndTime,
-					totalElapsed: Math.round( (mEndTime - mStartTime)/1000 )
+					totalSecondsElapsed: sumSplits,
+					splits: splits
 				};
 			}
 		};
 	}();
+
+	stopwatch.start();
+	stopwatch.split();
+	stopwatch.split();
+	stopwatch.stop();
+	var data = stopwatch.getData();
 
 	var testData = function () {
 		function leadingZero(value){
