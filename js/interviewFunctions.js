@@ -1,16 +1,142 @@
+"use strict";
+
 $(function(){
 	//Page initialization
 	var questionData = {currentQuestionIndex:0, questionList: null};
-	var testData = TestData();
+
+	var stopwatch = function(){
+		var mStartTime;
+		var mEndTime;
+		var running = false;
+
+		return {
+			start: function(){
+				if(!running){ 
+					mStartTime = new Date();
+					running = true;
+				}
+			},
+			stop: function(){
+				if(running){
+					mEndTime = new Date();
+					running = false;
+				}
+			},
+			getData: function(){
+				return {
+					startTime: mStartTime,
+					endTime: mEndTime,
+					totalElapsed: Math.round( (mEndTime - mStartTime)/1000 )
+				};
+			}
+		};
+	}();
+
+	var testData = function () {
+		function leadingZero(value){
+			if(value < 10) {
+				value = "0" + value;
+			}
+			return value;
+		}
+		
+		function dateToString(currentTime, appendSuffix) {
+			var hours = leadingZero(currentTime.getHours());
+			var minutes = leadingZero(currentTime.getMinutes());
+			var seconds = leadingZero(currentTime.getSeconds());
+			
+			var suffix = "";
+			if(appendSuffix === true) {
+				suffix = (hours >= 12) ? " PM" : " AM";
+			}
+			
+			if(hours > 12) hours -= 12;
+			var result = hours + ":" + minutes + ":" + seconds + suffix;
+			return result;
+		}
+		
+		function calcElapsed(endDate, startDate) {
+			var result = new Date();
+			var endTime = 
+			{
+				seconds: endDate.getSeconds(),
+				minutes: endDate.getMinutes(),
+				hours: endDate.getHours()
+			};
+			var startTime = 
+			{
+				seconds: startDate.getSeconds(),
+				minutes: startDate.getMinutes(),
+				hours: startDate.getHours()
+			};
+			
+			if(endTime.seconds < startTime.seconds)
+			{
+				endTime.seconds += 60;
+				startTime.minutes--;
+			}
+			if(endTime.minutes < startTime.minutes)
+			{
+				endTime.minutes += 60;
+				startTime.hours--;
+			}
+			result.setHours(endTime.hours - startTime.hours);
+			result.setMinutes(endTime.minutes - startTime.minutes);
+			result.setSeconds(endTime.seconds - startTime.seconds);
+			result = dateToString(result, false);
+			return result;
+		}
+		
+		var questionCounter = 0;
+		var intervalStart = new Date();
+		var intervalEnd = new Date();
+		var	testStart = Date();
+		var	testEnd = Date();
+		
+		return {
+			results: {},
+			
+			startTimer: function() { 
+				testStart = new Date();
+				intervalStart = testStart;
+				this.results.startTime = dateToString(testStart);
+				console.log(this.results);
+			},
+			
+			endTimer: function() { 
+				testEnd = new Date();
+				this.results.totalTime = calcElapsed(testEnd, testStart);
+				this.results.endTime = dateToString(testEnd);
+				console.log(this.results);
+			},
+			
+			addQAData: function() {
+				var newQAProp = "q" + questionCounter + "Data";
+				this.results[newQAProp] = {};
+				
+				this.results[newQAProp]["question"] = 
+					$('#questionTitle' + questionCounter).html();
+				this.results[newQAProp]["answer"] = 
+					$('#answer' + questionCounter).val();
+					
+				intervalEnd = new Date();
+				this.results[newQAProp]["interval"] = 
+					calcElapsed(intervalEnd, intervalStart);
+				intervalStart = intervalEnd;
+				questionCounter++;
+				console.log(this.results);
+			}
+		}
+	}();
 	
-	var rfTestData = {};
-	
+	var userInfo = {firstName: "", lastName: ""};
+
 	//Event handlers
 	$('#container').on('click', '#startButton', function(){
-		rfTestData.firstNameValue = $('#firstName').val();
-		rfTestData.lastNameValue = $('#lastName').val();
+		userInfo.firstName = $('#firstName').val();
+		userInfo.lastName = $('#lastName').val();
 		
-		if(rfTestData.firstNameValue === '' || rfTestData.lastNameValue === ''){
+		if(userInfo.firstName === '' || userInfo.lastName === ''){
 			$('#intervieweeInfoResult').html("Fill out the required information.");
 		}
 		else{
@@ -100,106 +226,6 @@ $(function(){
 		else{
 			testData.endTimer();
 		}
-	}
-	
-	//TestData factory
-	function TestData() {
-		function leadingZero(value){
-			if(value < 10) {
-				value = "0" + value;
-			}
-			return value;
-		}
-		
-		function dateToString(currentTime, appendSuffix) {
-			var hours = leadingZero(currentTime.getHours());
-			var minutes = leadingZero(currentTime.getMinutes());
-			var seconds = leadingZero(currentTime.getSeconds());
-			
-			var suffix = "";
-			if(appendSuffix === true) {
-				suffix = (hours >= 12) ? " PM" : " AM";
-			}
-			
-			if(hours > 12) hours -= 12;
-			var result = hours + ":" + minutes + ":" + seconds + suffix;
-			return result;
-		}
-		
-		function calcElapsed(endDate, startDate) {
-			var result = new Date();
-			var endTime = 
-			{
-				seconds: endDate.getSeconds(),
-				minutes: endDate.getMinutes(),
-				hours: endDate.getHours()
-			};
-			var startTime = 
-			{
-				seconds: startDate.getSeconds(),
-				minutes: startDate.getMinutes(),
-				hours: startDate.getHours()
-			};
-			
-			if(endTime.seconds < startTime.seconds)
-			{
-				endTime.seconds += 60;
-				startTime.minutes--;
-			}
-			if(endTime.minutes < startTime.minutes)
-			{
-				endTime.minutes += 60;
-				startTime.hours--;
-			}
-			result.setHours(endTime.hours - startTime.hours);
-			result.setMinutes(endTime.minutes - startTime.minutes);
-			result.setSeconds(endTime.seconds - startTime.seconds);
-			result = dateToString(result, false);
-			return result;
-		}
-		
-		var questionCounter = 0;
-		var intervalStart = new Date();
-		var intervalEnd = new Date();
-		var	testStart = Date();
-		var	testEnd = Date();
-		
-		var self = {
-			results: {},
-			
-			startTimer: function() { 
-				testStart = new Date();
-				intervalStart = testStart;
-				this.results.startTime = dateToString(testStart);
-				console.log(this.results);
-			},
-			
-			endTimer: function() { 
-				testEnd = new Date();
-				this.results.totalTime = calcElapsed(testEnd, testStart);
-				this.results.endTime = dateToString(testEnd);
-				console.log(this.results);
-			},
-			
-			addQAData: function() {
-				var newQAProp = "q" + questionCounter + "Data";
-				this.results[newQAProp] = {};
-				
-				this.results[newQAProp]["question"] = 
-					$('#questionTitle' + questionCounter).html();
-				this.results[newQAProp]["answer"] = 
-					$('#answer' + questionCounter).val();
-					
-				intervalEnd = new Date();
-				this.results[newQAProp]["interval"] = 
-					calcElapsed(intervalEnd, intervalStart);
-				intervalStart = intervalEnd;
-				questionCounter++;
-				console.log(this.results);
-			}
-		}
-		
-		return self;
 	}
 });
 
