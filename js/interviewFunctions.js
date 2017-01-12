@@ -5,18 +5,14 @@ $(function(){
 	var questionData = {currentQuestionIndex:0, questionList: null};
 
 	var stopwatch = function(){
-		var startTime;
 		var splitStartTime;
-		var endTime;
 		var splits = [];
 		var running = false;
-
 
 		return {
 			start: function(){
 				if(!running){ 
-					startTime = new Date();
-					splitStartTime = startTime;
+					splitStartTime = new Date();
 					running = true;
 				}
 			},
@@ -31,7 +27,6 @@ $(function(){
 			stop: function(){
 				if(running){
 					this.split();
-					endTime = new Date();
 					running = false;
 				}
 			},
@@ -39,7 +34,7 @@ $(function(){
 				var sumSplits = splits.reduce(function(previousValue, currentValue){
 					return currentValue + previousValue;
 				});
-				
+
 				return {
 					totalSecondsElapsed: sumSplits,
 					splits: splits
