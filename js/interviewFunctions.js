@@ -1,9 +1,24 @@
 "use strict";
 
 $(function(){
-	//Page initialization
-	var questionData = {currentQuestionIndex:0, questionList: null};
+	//Event handlers
+	var userInfo = {firstName: "", lastName: ""};
+	$('#container').on('click', '#startButton', function(){
+		userInfo.firstName = $('#firstName').val();
+		userInfo.lastName = $('#lastName').val();
+		
+		if(userInfo.firstName === '' || userInfo.lastName === ''){
+			$('#intervieweeInfoResult').html("Fill out the required information.");
+		}
+		else{
+			stopwatch.start();
+			advanceInterview();
+		}
+	});
+	
+	$('#container').on('click','.continueButton', advanceInterview);
 
+	//Modules
 	var stopwatch = function(){
 		var splitStartTime;
 		var splits = [];
@@ -43,13 +58,7 @@ $(function(){
 		};
 	}();
 
-	stopwatch.start();
-	stopwatch.split();
-	stopwatch.split();
-	stopwatch.stop();
-	var data = stopwatch.getData();
-
-	var testData = function () {
+	var interviewData = function () {
 		function leadingZero(value){
 			if(value < 10) {
 				value = "0" + value;
@@ -72,62 +81,19 @@ $(function(){
 			return result;
 		}
 		
-		function calcElapsed(endDate, startDate) {
-			var result = new Date();
-			var endTime = 
-			{
-				seconds: endDate.getSeconds(),
-				minutes: endDate.getMinutes(),
-				hours: endDate.getHours()
-			};
-			var startTime = 
-			{
-				seconds: startDate.getSeconds(),
-				minutes: startDate.getMinutes(),
-				hours: startDate.getHours()
-			};
-			
-			if(endTime.seconds < startTime.seconds)
-			{
-				endTime.seconds += 60;
-				startTime.minutes--;
-			}
-			if(endTime.minutes < startTime.minutes)
-			{
-				endTime.minutes += 60;
-				startTime.hours--;
-			}
-			result.setHours(endTime.hours - startTime.hours);
-			result.setMinutes(endTime.minutes - startTime.minutes);
-			result.setSeconds(endTime.seconds - startTime.seconds);
-			result = dateToString(result, false);
-			return result;
-		}
-		
 		var questionCounter = 0;
-		var intervalStart = new Date();
-		var intervalEnd = new Date();
-		var	testStart = Date();
-		var	testEnd = Date();
-		
+		var data;
+		$.get({
+			url: "getInterviewQuestions.php",
+			dataType: "json",
+			success: function(result){
+				data = result;
+			} 
+		});
+
 		return {
 			results: {},
-			
-			startTimer: function() { 
-				testStart = new Date();
-				intervalStart = testStart;
-				this.results.startTime = dateToString(testStart);
-				console.log(this.results);
-			},
-			
-			endTimer: function() { 
-				testEnd = new Date();
-				this.results.totalTime = calcElapsed(testEnd, testStart);
-				this.results.endTime = dateToString(testEnd);
-				console.log(this.results);
-			},
-			
-			addQAData: function() {
+			addAnswerData: function() {
 				var newQAProp = "q" + questionCounter + "Data";
 				this.results[newQAProp] = {};
 				
@@ -136,61 +102,19 @@ $(function(){
 				this.results[newQAProp]["answer"] = 
 					$('#answer' + questionCounter).val();
 					
-				intervalEnd = new Date();
-				this.results[newQAProp]["interval"] = 
-					calcElapsed(intervalEnd, intervalStart);
-				intervalStart = intervalEnd;
 				questionCounter++;
-				console.log(this.results);
 			}
 		}
 	}();
-	
-	var userInfo = {firstName: "", lastName: ""};
 
-	//Event handlers
-	$('#container').on('click', '#startButton', function(){
-		userInfo.firstName = $('#firstName').val();
-		userInfo.lastName = $('#lastName').val();
-		
-		if(userInfo.firstName === '' || userInfo.lastName === ''){
-			$('#intervieweeInfoResult').html("Fill out the required information.");
-		}
-		else{
-			testData.startTimer();
-			nextQuestion();
-		}
-	});
-	
-	$('#container').on('click','.continueButton', nextQuestion);
 
-	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError){
-		console.log("AJAX Error\n" + 
-		"Thrown Error: " + thrownError + "\n" +
-		"Response: " + jqXHR.responseText);
-	});
-
-	$.get({
-		url: "getInterviewQuestions.php",
-		dataType: "json",
-		success: function(result){
-			if(result !== "failure") {
-				questionData.questionList = result;
-			}
-			else {
-				$('#intervieweeInfoResult').html("There was an error retrieving the question list.");
-			}
-		} 
-	});
-
-	function nextQuestion(){
+	function advanceInterview(){
 		if(questionData.currentQuestionIndex !== 0){
-			var completedQuestionIndex = questionData.currentQuestionIndex - 1;
-			testData.addQAData();
+			interviewData.addQAData();
 		}
-		if(questionData.currentQuestionIndex < questionData.questionList.length){
+		if(questionData.currentQuestionIndex < questionList.length){
 			var questionIndex = questionData.currentQuestionIndex;
-			var questionList = questionData.questionList;
+			var questionList = questionList;
 			
 			$('#questionPanel').append("<section id=\"questionDisplay\"><div><h1 class=\"questionNumber" + questionIndex + "\"></h1><div id=\"interviewForm\"><h3 id=\"questionTitle" + questionIndex + "\"></h3><p id=\"questionDescription" + questionIndex + "\"></p><textarea id=\"answer" + questionIndex + "\"></textarea><div class=\"buttonContainer\"><button name=\"continueButton\" class=\"continueButton\" id=\"continueButton" + questionIndex + "\">Continue</button></div></div></div></section><div class=\"space\"></div>");
 		
@@ -205,7 +129,7 @@ $(function(){
 			$('body').css("overflow", "hidden");
 			questionData.currentQuestionIndex++;
 			
-			if(questionData.currentQuestionIndex == questionData.questionList.length){
+			if(questionData.currentQuestionIndex == questionList.length){
 				$('#continueButton' + questionIndex).html("Finish");
 				$('#continueButton' + questionIndex).click(function() {
 					$('#questionPanel').append("<section id=\"endMessageDisplay\"><div><h1 class=\"endPage\">Thank you!<br/>Your evaluation has been sent to the appropriate personnel.</h1></div></section><div class=\"space\"></div>");
@@ -218,7 +142,7 @@ $(function(){
 					var intervieweeTest = {
 					'firstName': firstNameValue,
 					'lastName': lastNameValue,
-					'testData': testData.results
+					'testData': interviewData.results
 					};
 				
 					//we make the ajax request
@@ -241,7 +165,7 @@ $(function(){
 			
 		}
 		else{
-			testData.endTimer();
+			interviewData.endTimer();
 		}
 	}
 });
