@@ -76,10 +76,7 @@ $(function(){
 			} 
 		});
 		self.addAnswerData = function(questionIndex, answerString) { this.data[questionIndex].answer = answerString; };
-			/*
-			this.results[newQAProp]["answer"] = 
-				$('#answer' + _questionCounter).val();
-			*/	
+
 		return self;
 	}();
 	
@@ -100,6 +97,27 @@ $(function(){
 		}
 	});
 	
+	$('#container').on('click','#finishButton', function(){
+		stopwatch.stop();
+		questionAnswerData.addAnswerData(gCurrentQuestionIndex, $('#answer' + gCurrentQuestionIndex).val());
+
+		$('#questionPanel').append("<section id=\"endMessageDisplay\"><div>" +
+		"<h1 class=\"endPage\">Thank you!<br/>Your evaluation has been sent to the appropriate personnel." +
+		"</h1></div></section><div class=\"space\"></div>");
+		$('body, html').animate({ scrollTop: $(".endPage").offset().top }, 1000);
+		
+		var results = {
+			'firstName': userInfo.firstName,
+			'lastName': userInfo.lastName,
+			'testData': questionAnswerData.data
+		};
+		$.post({
+			url : 'addIntervieweeTest.php',
+			data : results,
+			dataType : "json",
+		});
+	});
+
 	$('#container').on('click','.continueButton', function(){
 		questionAnswerData.addAnswerData(gCurrentQuestionIndex, $('#answer' + gCurrentQuestionIndex).val());
 		gCurrentQuestionIndex++;
@@ -107,37 +125,9 @@ $(function(){
 		
 		if(gCurrentQuestionIndex === questionAnswerData.data.length - 1){
 			$('#container').off("click", ".continueButton");
-			
 			var finishButton = $('#continueButton' + gCurrentQuestionIndex);
+			finishButton.attr("id", "finishButton");
 			finishButton.html("Finish");
-			finishButton.click(function() {
-				stopwatch.stop();
-				questionAnswerData.addAnswerData(gCurrentQuestionIndex, $('#answer' + gCurrentQuestionIndex).val());
-				
-				$('#questionPanel').append("<section id=\"endMessageDisplay\"><div>" +
-				"<h1 class=\"endPage\">Thank you!<br/>Your evaluation has been sent to the appropriate personnel." +
-				"</h1></div></section><div class=\"space\"></div>");
-				$('body, html').animate({ scrollTop: $(".endPage").offset().top }, 1000);
-				
-				var results = {
-					'firstName': userInfo.firstName,
-					'lastName': userInfo.lastName,
-					'testData': questionAnswerData.data
-				};
-				$.post({
-					url : 'addIntervieweeTest.php',
-					data : results,
-					dataType : "json",
-					success:function(result){
-						if(result !== 'failure'){
-							$('#intervieweeInfoResult').html("Successfully saved interviewee data to the database.");
-						}
-						else {
-							$('#intervieweeInfoResult').html("There was an error saving interviewee to the database.");
-						}
-					}
-				});
-			});
 		}
 	});
 
@@ -159,42 +149,4 @@ $(function(){
 		//Prevent users from scrolling to the previous question.
 		$('body').css("overflow", "hidden");
 	}
-	
-
-
-	var continueInterview = function(){
-		//store answer data (if necessary)
-		//display next question
-		//
-
-
-		var numberOfQuestions = questionAnswerData.data.length;
-		var _currentQuestionIndex = 0;
-		var interviewStarted = false;
-		var self = function(){
-			if(interviewStarted){ 
-				questionAnswerData.addAnswerData(); 
-				_currentQuestionIndex++;
-			}
-			else {
-				interviewStarted = true;
-			}
-
-			if(_currentQuestionIndex < numberOfQuestions){
-				var questionIndex = questionData.currentQuestionIndex;
-				var questionList = questionList;
-				
-				
-				questionData.currentQuestionIndex++;
-				
-				if(questionData.currentQuestionIndex == questionList.length){
-					
-					
-				}
-			}
-			else{
-				questionAnswerData.endTimer();
-			}
-		}
-	}();
 });
