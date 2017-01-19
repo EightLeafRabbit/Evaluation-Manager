@@ -6,7 +6,7 @@
     <!--<script src="js/functions.js"></script>-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 	<script src="js/general.js"></script>
-	<script src="js/interviewFunctions.js"></script>
+	<script src="js/interview.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!--script src="js/velocity.min.js"></script>
 	<script src="js/velocity.ui.min.js"></script>
