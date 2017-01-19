@@ -69,7 +69,8 @@ $(function(){
 		var self = {};
 		self.data = [];
 		$.get({
-			url: "getInterviewQuestions.php",
+			url: "interview-functions.php",
+			data: {action: "getQuestions"},
 			dataType: "json",
 			success: function(result){
 				self.data = result;
@@ -106,15 +107,14 @@ $(function(){
 		"</h1></div></section><div class=\"space\"></div>");
 		$('body, html').animate({ scrollTop: $(".endPage").offset().top }, 1000);
 		
-		var results = {
-			'firstName': userInfo.firstName,
-			'lastName': userInfo.lastName,
-			'testData': questionAnswerData.data
+		var testData = {
+			firstName: userInfo.firstName,
+			lastName: userInfo.lastName,
+			testData: questionAnswerData.data
 		};
 		$.post({
-			url : 'addIntervieweeTest.php',
-			data : results,
-			dataType : "json",
+			url : 'interview-functions.php',
+			data : {action: "insertTestResults", testData: testData},
 		});
 	});
 
